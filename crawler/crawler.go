@@ -84,7 +84,7 @@ func GetPages() {
 
 	for i := 0; i < len(HoleList); i++ {
 		ParseHole(&HoleList[i])
-		time.Sleep(time.Second)
+		time.Sleep(time.Second*3)
 	}
 }
 
@@ -120,17 +120,19 @@ func ParseHolePage(h *Hole) (*goquery.Document, error) {
 	reqest, err := http.NewRequest("GET", h.Url, nil)
 	//增加header选项
 
-	reqest.Header.Add("Accept", "text/html, application/xhtml+xml, application/xml; q=0.9, */*; q=0.8")
+	reqest.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3")
 	reqest.Header.Add("Accept-Encoding", "gzip, deflate, br")
-	reqest.Header.Add("Accept-Language", "zh-CN")
+	reqest.Header.Add("Accept-Language", "zh-CN,zh;q=0.9")
 	reqest.Header.Add("Cache-Control", "max-age=0")
 	reqest.Header.Add("Connection", "Keep-Alive")
-	reqest.Header.Add("Cookie", "JSESSIONID=1ADC34379783FDD6171910D12CA1A620; Hm_lpvt_d7682ab43891c68a00de46e9ce5b76aa=1565942001; __jsl_clearance=1565948341.744|0|f9Esp%2BepGK8roiN0aaOwxvwjATg%3D; Hm_lvt_d7682ab43891c68a00de46e9ce5b76aa=1565942001; __jsluid_s=35d4e03650f4d048107fa6afef750529")
+	reqest.Header.Add("Cookie", "JSESSIONID=05DCDCA2AE084CEB0F45FDE197CE8A9E; __jsl_clearance=1565972211.667|0|YqiRYqKoW8ardzabAGKB3q2UKK8%3D; __jsluid_s=1562270a633103338cd4b3fffd9e1ef8; __jsluid_h=5eeca75fab78d68d624506f6a6760378; puk=077df5d2afa8609862b895e3ed271fa410faba86a4fc40a1a8a6c04929f030cea6649567ec415a23e5026db436036cad4da1809494523bd49af54d388bc7060fa16949beba6e8fa7747837a03541794131f76b74596b843193d7c3f26b8354c5b815fe8c8a2ed15298834005267c87937b0955568a34aaec58eaf8baf4d1c1eb")
 	reqest.Header.Add("Host", "www.cnvd.org.cn")
-	reqest.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "+
-		"(KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134")
-	reqest.Header.Add("Referer", "https://ics.cnvd.org.cn/")
+	reqest.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362")
+	reqest.Header.Add("Referer", h.Url)
 	reqest.Header.Add("Upgrade", "1")
+	//reqest.Header.Add("Sec-Fetch-Mode","navigate")
+	//reqest.Header.Add("Sec-Fetch-Site","none")
+	//reqest.Header.Add("Sec-Fetch-User","?1")
 
 	if err != nil {
 		panic(err)

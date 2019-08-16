@@ -1,8 +1,7 @@
 package main
 
 import (
-
-"cnvd_crawler/crawler"
+	"Hole/crawler"
 )
 
 func main() {
