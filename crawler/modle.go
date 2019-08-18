@@ -11,7 +11,7 @@ var (
 	username string = "root"
 	password string = "root"
 	dbName   string = "hole"
-	host     string = "192.168.0.104"
+	host     string = "127.0.0.1"
 	port     int    = 3306
 
 	DBHd          *gorm.DB

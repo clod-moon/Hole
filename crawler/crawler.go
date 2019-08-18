@@ -82,7 +82,7 @@ func GetPages() {
 
 	fmt.Println("len:",len(HoleList))
 
-	for i := 0; i < len(HoleList); i++ {
+	for i := 0; i < 7; i++ {
 		ParseHole(&HoleList[i])
 		time.Sleep(time.Second*3)
 	}
@@ -125,9 +125,10 @@ func ParseHolePage(h *Hole) (*goquery.Document, error) {
 	reqest.Header.Add("Accept-Language", "zh-CN,zh;q=0.9")
 	reqest.Header.Add("Cache-Control", "max-age=0")
 	reqest.Header.Add("Connection", "Keep-Alive")
-	reqest.Header.Add("Cookie", "JSESSIONID=05DCDCA2AE084CEB0F45FDE197CE8A9E; __jsl_clearance=1565972211.667|0|YqiRYqKoW8ardzabAGKB3q2UKK8%3D; __jsluid_s=1562270a633103338cd4b3fffd9e1ef8; __jsluid_h=5eeca75fab78d68d624506f6a6760378; puk=077df5d2afa8609862b895e3ed271fa410faba86a4fc40a1a8a6c04929f030cea6649567ec415a23e5026db436036cad4da1809494523bd49af54d388bc7060fa16949beba6e8fa7747837a03541794131f76b74596b843193d7c3f26b8354c5b815fe8c8a2ed15298834005267c87937b0955568a34aaec58eaf8baf4d1c1eb")
+	
+	reqest.Header.Add("Cookie", "__jsluid_s=7722d59710a2fd36e9f997d41627bb62; JSESSIONID=5D53D5A12AFCF2ED9219FBB081D766EA; __jsl_clearance=1566033138.548|0|giNLW3KHnex0pm19hDsrS3BDFug%3D")
 	reqest.Header.Add("Host", "www.cnvd.org.cn")
-	reqest.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362")
+	reqest.Header.Add("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:28.0) Gecko/20100101 Firefox/28.0")
 	reqest.Header.Add("Referer", h.Url)
 	reqest.Header.Add("Upgrade", "1")
 	//reqest.Header.Add("Sec-Fetch-Mode","navigate")
