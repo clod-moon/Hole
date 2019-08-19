@@ -6,5 +6,5 @@ do
         if [ ! "$server" ]; then
            ./Hole &
         fi
-        sleep 300
+        sleep 200
 done

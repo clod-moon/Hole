@@ -8,18 +8,18 @@ import (
 )
 
 var (
-	username string = "root"
-	password string = "root"
-	dbName   string = "hole"
-	host     string = "127.0.0.1"
-	port     int    = 3306
+	Username string = "root"
+	Password string = "root"
+	DbName   string = "hole"
+	Host     string = "192.168.1.224"
+	Port     int    = 3306
 
 	DBHd          *gorm.DB
 
 )
 
 func Init(){
-	mysqlstr := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", username, password, host, port, dbName)
+	mysqlstr := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", Username, Password, Host, Port, DbName)
 	DB, err := gorm.Open("mysql", mysqlstr)
 	if err != nil {
 		log.Fatalf(" gorm.Open.err: %v", err)

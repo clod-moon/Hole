@@ -19,19 +19,27 @@ type Hole struct {
 	OpenDate       string `gorm:"type:varchar(30)"`
 	Level          string `gorm:"type:varchar(30)"`
 	AffectProduct  string `gorm:"type:text"`
-	CVEID          string `gorm:"type:varchar(30)"`
+	CVEID          string `gorm:"type:text"`
 	Description    string `gorm:"type:text"`
-	HoleType       string `gorm:"type:varchar(30)"`
+	HoleType       string `gorm:"type:text"`
 	RefLinking     string `gorm:"type:text"`
 	Solution       string `gorm:"type:text"`
 	Patch          string `gorm:"type:text"`
 	AuthInfo       string `gorm:"type:text"`
-	SubmitTime     string `gorm:"type:varchar(30)"`
-	CollectionTime string `gorm:"type:varchar(30)"`
-	UpdateTime     string `gorm:"type:varchar(30)"`
+	SubmitTime     string `gorm:"type:text"`
+	CollectionTime string `gorm:"type:text"`
+	UpdateTime     string `gorm:"type:text"`
 }
 
 var (
+	Cookie     string
+	Accept     string
+	Coding     string
+	Language   string
+	Control    string
+	Connection string
+	CNDVHost       string
+	Agent      string
 	HoleList   []Hole
 	rgx        = regexp.MustCompile(`<span class="([a-z]+) showInfo"></span>`)
 	rgxProduct = regexp.MustCompile(`([^<]*)<br/>`)
@@ -60,7 +68,7 @@ func StartCrawler() {
 
 	GetPages()
 
-	WriteExecl()
+	//WriteExecl()
 }
 
 func GetPages() {
@@ -76,16 +84,23 @@ func GetPages() {
 	//	time.Sleep(time.Second * 5)
 	//}
 //
-	//fmt.Println("len:", len(HoleList))
+	fmt.Println("len:", len(HoleList))
 
-	DBHd.Find(&HoleList,`cnvd_id = ""`)
+	DBHd.Find(&HoleList,`ref_linking = ""`)
 
 	fmt.Println("len:",len(HoleList))
 
 	for i := 0; i < 7; i++ {
 		ParseHole(&HoleList[i])
-		time.Sleep(time.Second*3)
+		fmt.Println(HoleList[i].ID)
+		time.Sleep(time.Second*5)
 	}
+
+	//var h Hole
+	//h.ID = 812
+	//h.Url = `https://www.cnvd.org.cn/flaw/show/CNVD-2019-22236`
+	//ParseHole(&h)
+	//fmt.Println(h)
 }
 
 func ParsePages(doc *goquery.Document) {
@@ -120,20 +135,16 @@ func ParseHolePage(h *Hole) (*goquery.Document, error) {
 	reqest, err := http.NewRequest("GET", h.Url, nil)
 	//增加header选项
 
-	reqest.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3")
-	reqest.Header.Add("Accept-Encoding", "gzip, deflate, br")
-	reqest.Header.Add("Accept-Language", "zh-CN,zh;q=0.9")
-	reqest.Header.Add("Cache-Control", "max-age=0")
-	reqest.Header.Add("Connection", "Keep-Alive")
-	
-	reqest.Header.Add("Cookie", "__jsluid_s=7722d59710a2fd36e9f997d41627bb62; JSESSIONID=5D53D5A12AFCF2ED9219FBB081D766EA; __jsl_clearance=1566033138.548|0|giNLW3KHnex0pm19hDsrS3BDFug%3D")
-	reqest.Header.Add("Host", "www.cnvd.org.cn")
-	reqest.Header.Add("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:28.0) Gecko/20100101 Firefox/28.0")
+	reqest.Header.Add("Accept", Accept)
+	reqest.Header.Add("Accept-Encoding", Coding)
+	reqest.Header.Add("Accept-Language", Language)
+	reqest.Header.Add("Cache-Control", Control)
+	reqest.Header.Add("Connection", Connection)
+	reqest.Header.Add("Cookie", Cookie)
+	reqest.Header.Add("Host", CNDVHost)
+	reqest.Header.Add("User-Agent", Agent)
 	reqest.Header.Add("Referer", h.Url)
-	reqest.Header.Add("Upgrade", "1")
-	//reqest.Header.Add("Sec-Fetch-Mode","navigate")
-	//reqest.Header.Add("Sec-Fetch-Site","none")
-	//reqest.Header.Add("Sec-Fetch-User","?1")
+	//reqest.Header.Add("Upgrade", "1")
 
 	if err != nil {
 		panic(err)
@@ -158,7 +169,7 @@ func ParseHolePage(h *Hole) (*goquery.Document, error) {
 
 }
 
-func ParseHole(h *Hole) {
+func ParseHole2(h *Hole) {
 
 	doc, err := ParseHolePage(h)
 	if err != nil {
@@ -234,6 +245,79 @@ func ParseHole(h *Hole) {
 			break
 		}
 	})
-	fmt.Println(h.CnvdID)
+	fmt.Println(h.AffectProduct)
+	fmt.Println(h.Description)
+	//fmt.Println(h.CnvdID)
+	//DBHd.Save(h)
+}
+
+func ParseHole(h *Hole) {
+
+	doc, err := ParseHolePage(h)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	doc.Find("table.gg_detail  tbody tr ").Each(func(i int, s *goquery.Selection) {
+		//fmt.Println(s.Text())
+		align := s.Find("td.alignRight").Text()
+		s.Find("td").Each(func(t int, td *goquery.Selection) {
+			//fmt.Println(td.Next().Text())
+			if align == "CNVD-ID"{
+				h.CnvdID = strings.TrimSpace(td.Text())
+			}else if align == "公开日期"{
+				h.OpenDate = strings.TrimSpace(td.Text())
+			} else if align == "危害级别"{
+				str, _ := td.Next().Html()
+				if len(rgx.FindStringSubmatch(str)) > 1 {
+					h.Level = transLevel(rgx.FindStringSubmatch(str)[1])
+				} else {
+					h.Level = "低"
+				}
+			} else if align == "影响产品"{
+				str, _ := td.Next().Html()
+				strs := rgxProduct.FindAllStringSubmatch(str, -1)
+				for i := 0; i < len(strs); i++ {
+					if i != 0 {
+						h.AffectProduct += "\n\r"
+					}
+					h.AffectProduct += strings.TrimSpace(strs[i][1])
+				}
+			} else if align == "CVE ID"{
+				h.CVEID = strings.TrimSpace(td.Text())
+			} else if align == "漏洞描述"{
+				str, _ := td.Next().Html()
+				strs := rgxProduct.FindAllStringSubmatch(str, -1)
+				for i := 0; i < len(strs); i++ {
+					h.Description += strings.TrimSpace(strs[i][1])
+				}
+			} else if align == "漏洞类型"{
+				str, _ := td.Html()
+				h.HoleType = strings.TrimSpace(str)
+			} else if align == "参考链接"{
+				h.RefLinking, _ = td.Find("a").Attr("href")
+				if len(h.RefLinking) < 1{
+					h.RefLinking = h.Url
+				}
+			} else if align == "漏洞解决方案"{
+				str, _ := td.Next().Html()
+				strs := rgxProduct.FindAllStringSubmatch(str, -1)
+				for i := 0; i < len(strs); i++ {
+					h.Solution += strings.TrimSpace(strs[i][1])
+				}
+			} else if align == "厂商补丁"{
+				h.Patch = strings.TrimSpace(td.Text())
+			} else if align == "验证信息"{
+				h.AuthInfo = strings.TrimSpace(td.Text())
+			} else if align == "报送时间"{
+				h.SubmitTime = strings.TrimSpace(td.Text())
+			} else if align == "收录时间"{
+				h.CollectionTime = strings.TrimSpace(td.Text())
+			} else if align == "更新时间"{
+				h.UpdateTime = strings.TrimSpace(td.Text())
+			}
+		})
+	})
+
 	DBHd.Save(h)
 }
